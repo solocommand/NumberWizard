@@ -8,7 +8,7 @@ public class TextController : MonoBehaviour {
 
 	public Text text;
 
-	private enum States { New, Cell, Sheets, Lock, Mirror, Corridor, Hairpin, Stairs, Closet, Freedom };
+	private enum States { Menu, Cell, Sheets, Lock, Mirror, Corridor, Hairpin, Stairs, Closet, Freedom };
 	private States State;
 
 	private bool closetUnlocked;
@@ -17,37 +17,58 @@ public class TextController : MonoBehaviour {
 	private bool hasCostume;
 	private bool hasHairpin;
 
-	void Start () {
-		State = States.New;
+	/**
+	 * Start is called when the game is started for the first time.
+	 */
+	void Start ()
+	{
+		State = States.Menu;
 	}
 
 	/**
 	 * Update is called each frame. Switch state display and handle reset
+	 * @see https://docs.unity3d.com/ScriptReference/MonoBehaviour.Invoke.html
 	 */
 	void Update ()
 	{
+		// Global keyboard interrupts
 		if (Input.GetKeyDown(KeyCode.Escape)) {
-			State = States.New;
+			State = States.Menu;
 		}
 
+		// Display the current state
 		this.Invoke("State" + State, 0f);
 	}
 
-	#region State Displays (levels)
-	void StateNew() {
+	/**
+	 * Resets game progress
+	 */
+	void Reset ()
+	{
 		hasSheets = false;
 		hasMirror = false;
 		hasCostume = false;
 		hasHairpin = false;
 		closetUnlocked = false;
+	}
 
+	/**
+	 *
+	 */
+	void StateMenu ()
+	{
+		Reset();
 		text.text = "Press [SPACE] to begin";
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			State = States.Cell;
 		}
 	}
 
-	void StateCell() {
+	/**
+	 *
+	 */
+	void StateCell ()
+	{
 		string sheets = hasSheets ? "is an empty" : "are some dirty sheets on the";
 		string mirror = hasMirror ? "blank spot" : "mirror";
 		text.text = String.Format("You are in a prison cell, and you want to escape. " +
@@ -56,11 +77,11 @@ public class TextController : MonoBehaviour {
 			sheets,
 			mirror
 		);
-		text.text = text.text + "[S] Inspect Sheets\n";
+		text.text = text.text + "[B] Inspect Bed\n";
 		text.text = text.text + "[M] Inspect " + char.ToUpper(mirror[0]) + mirror.Substring(1) + "\n";
 		text.text = text.text + "[L] Inspect Lock\n";
 
-		if (Input.GetKeyDown(KeyCode.S)) {
+		if (Input.GetKeyDown(KeyCode.B)) {
 			State = States.Sheets;
 		}
 		if (Input.GetKeyDown(KeyCode.M)) {
@@ -71,7 +92,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateSheets() {
+
+	/**
+	 *
+	 */
+	void StateSheets ()
+	{
 		if (hasSheets) {
 			text.text = "Your bed looks empty without your sheets.\n\n" +
 				"[R] Return to Cell"
@@ -92,7 +118,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateLock() {
+
+	/**
+	 *
+	 */
+	void StateLock ()
+	{
 		if (hasMirror) {
 			text.text = "This door is locked from the outside. Perhaps your new mirror could be of use?\n\n"  +
 				"[M] Use Mirror"
@@ -110,7 +141,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateMirror() {
+
+	/**
+	 *
+	 */
+	void StateMirror ()
+	{
 		if (hasMirror) {
 			text.text = "The blank spot on the wall where the mirror was glistens with...something. " +
 				"Probably just a shadow.\n\n" +
@@ -132,7 +168,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateCorridor() {
+
+	/**
+	 *
+	 */
+	void StateCorridor ()
+	{
 		string closet = "an unobtrusive closet marked \"CUSTODIAL\"";
 		if (closetUnlocked) {
 			closet = "an open closet door";
@@ -161,7 +202,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateStairs() {
+
+	/**
+	 *
+	 */
+	void StateStairs ()
+	{
 		if (hasSheets) {
 			text.text = "You throw your sheets over your head like a ghost. This might be the craziest thing you've tried yet.\n\n";
 			text.text = text.text + "[G] Go for it\n";
@@ -175,7 +221,7 @@ public class TextController : MonoBehaviour {
 		} else if (!hasCostume) {
 			text.text = "A passing guard recognizes you and pounces. After a swift struggle, you are overpowered and returned to your cell.\n\nPress [SPACE] to continue.";
 			if (Input.GetKeyDown(KeyCode.Space)) {
-				State = States.New;
+				State = States.Menu;
 			}
 		} else {
 			text.text = "Your stolen disguise might do the trick.\n\n";
@@ -189,7 +235,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateHairpin() {
+
+	/**
+	 *
+	 */
+	void StateHairpin ()
+	{
 		text.text = "You seem to remember someone using a hairpin to pick a lock. Or maybe that was something else?\n\n";
 		text.text = text.text + "[T] Take Hairpin\n";
 		text.text = text.text + "[R] Return to Corridor";
@@ -202,7 +253,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateCloset() {
+
+	/**
+	 *
+	 */
+	void StateCloset ()
+	{
 		if (closetUnlocked && !hasCostume) {
 			text.text = "You look around the closet and see an old pair of janitor's coveralls. They might make a decent disguise.\n\n";
 			text.text = text.text + "[C] Take Coveralls\n";
@@ -227,8 +283,12 @@ public class TextController : MonoBehaviour {
 		}
 	}
 
-	void StateFreedom() {
+
+	/**
+	 *
+	 */
+	void StateFreedom ()
+	{
 		text.text = "You have escaped!\n\nPress [ESC] to play again.";
 	}
-	#endregion
 }
