@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class TextController : MonoBehaviour {
 
 	public Text text;
 
 	private enum States { New, Cell, Sheets, Lock, Mirror, Corridor, Hairpin, Stairs, Closet, Freedom };
-	private States State = States.New;
+	private States State;
 
 	private bool closetUnlocked;
 	private bool hasSheets;
@@ -16,28 +17,23 @@ public class TextController : MonoBehaviour {
 	private bool hasCostume;
 	private bool hasHairpin;
 
-	// Use this for initialization
 	void Start () {
 		State = States.New;
 	}
 
-	// Update is called once per frame
-	void Update () {
+	/**
+	 * Update is called each frame. Switch state display and handle reset
+	 */
+	void Update ()
+	{
 		if (Input.GetKeyDown(KeyCode.Escape)) {
 			State = States.New;
 		}
-		if (State == States.New) 						{ StateNew(); }
-		else if (State == States.Cell) 			{ StateCell(); }
-		else if (State == States.Sheets) 		{ StateSheets(); }
-		else if (State == States.Lock) 			{ StateLock(); }
-		else if (State == States.Mirror)  	{ StateMirror(); }
-		else if (State == States.Corridor) 	{ StateCorridor(); }
-		else if (State == States.Hairpin) 	{ StateHairpin(); }
-		else if (State == States.Stairs) 		{ StateStairs(); }
-		else if (State == States.Closet) 		{ StateCloset(); }
-		else if (State == States.Freedom) 	{ StateFreedom(); }
+
+		this.Invoke("State" + State, 0f);
 	}
 
+	#region State Displays (levels)
 	void StateNew() {
 		hasSheets = false;
 		hasMirror = false;
@@ -45,36 +41,31 @@ public class TextController : MonoBehaviour {
 		hasHairpin = false;
 		closetUnlocked = false;
 
-		text.text = "Press [SPACE] to begin.";
+		text.text = "Press [SPACE] to begin";
 		if (Input.GetKeyDown(KeyCode.Space)) {
 			State = States.Cell;
 		}
 	}
 
 	void StateCell() {
-		string sheets = "are some dirty sheets on the";
-		if (hasSheets) {
-			sheets = "is an empty";
-		}
-		string mirror = "mirror";
-		if (hasMirror) {
-			mirror = "blank spot";
-		}
-		text.text = "You are in a prison cell, and you want to escape. " +
-			"There "+sheets+" bed, a "+mirror+" on the wall, " +
-			"and the door is locked from the outside.\n\n"
-		;
+		string sheets = hasSheets ? "is an empty" : "are some dirty sheets on the";
+		string mirror = hasMirror ? "blank spot" : "mirror";
+		text.text = String.Format("You are in a prison cell, and you want to escape. " +
+			"There {0} bed, a {1} on the wall, " +
+			"and the door is locked from the outside.\n\n",
+			sheets,
+			mirror
+		);
 		text.text = text.text + "[S] Inspect Sheets\n";
+		text.text = text.text + "[M] Inspect " + char.ToUpper(mirror[0]) + mirror.Substring(1) + "\n";
+		text.text = text.text + "[L] Inspect Lock\n";
+
 		if (Input.GetKeyDown(KeyCode.S)) {
 			State = States.Sheets;
 		}
-		if (!hasMirror) {
-			text.text = text.text + "[M] Inspect Mirror\n";
-			if (Input.GetKeyDown(KeyCode.M)) {
-				State = States.Mirror;
-			}
+		if (Input.GetKeyDown(KeyCode.M)) {
+			State = States.Mirror;
 		}
-		text.text = text.text + "[L] Inspect Lock";
 		if (Input.GetKeyDown(KeyCode.L)) {
 			State = States.Lock;
 		}
@@ -239,4 +230,5 @@ public class TextController : MonoBehaviour {
 	void StateFreedom() {
 		text.text = "You have escaped!\n\nPress [ESC] to play again.";
 	}
+	#endregion
 }
